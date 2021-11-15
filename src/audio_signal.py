@@ -37,7 +37,7 @@ class AudioSignal:
         return f"{self.filename} - {self.sample_rate}Hz - {self.dtype}"
 
     def trim_audio(self, initial: int, final: int):
-        self.signal = self.signal[initial:final]
+        self.signal = self.signal[initial:final * self.sample_rate]
 
     def extract_embedding(self):
         self.embedding = torch.Tensor((0, 0))
@@ -73,8 +73,3 @@ if __name__ == "__main__":
     audio_signals = [pipeline(file) for file in tqdm(file_generator(dir_path))]
 
     [print(i, "\n==============================\n") for i in audio_signals]
-
-
-
-# dataframe
-# signal.filename, signal.embedding, signal.dirname
