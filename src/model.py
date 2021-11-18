@@ -10,7 +10,7 @@ def average_embedding(emb: torch.Tensor):
 class ECAPATDNN:
 
     def __init__(self):
-        self.model = None
+        self.load()
 
     def __call__(self, X: torch.Tensor):
         self.load()
