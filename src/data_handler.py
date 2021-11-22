@@ -4,8 +4,8 @@ import pandas as pd
 from typing import Generator
 from pathlib import Path
 from tqdm import tqdm
-from src.model import ECAPATDNN
-from src.audio_signal import AudioSignal
+from model import ECAPATDNN
+from audio_signal import AudioSignal
 
 
 ecapa = ECAPATDNN()
@@ -21,7 +21,7 @@ def file_generator(dir_path: str) -> Generator[str, None, None]:
 
 
 def get_band(filepath):
-    return str(filepath).split("/")[1]
+    return str(filepath).split("/")[2]
 
 
 def get_embedding(filepath):
@@ -36,30 +36,38 @@ def get_album(filepath):
 
 
 def get_song(filepath):
-    return str(filepath).split("/")[3]
+    return str(filepath).split("/")[-1]
 
 
 def pipeline(data_path: Path):
     df = pd.DataFrame()
+
+    generator_count = sum(1 for _ in file_generator(data_path))
 
     files_generator = file_generator(data_path)
 
     filenames = []
     embeddings = []
     bands = []
-    albums = []
+    # albums = []
     songs = []
-    for filepath in tqdm(files_generator):
+    for filepath in tqdm(files_generator, total=generator_count, position=0, leave=True):
+        band = get_band(filepath)
+        song = get_song(filepath)
+        embedding = get_embedding(filepath)
+
         filenames.append(filepath)
-        embeddings.append(get_embedding(filepath))
-        bands.append(get_band(filepath))
-        albums.append(get_album(filepath))
-        songs.append(get_song(filepath))
+        embeddings.append(embedding)
+        bands.append(band)
+        # albums.append(get_album(filepath))
+        songs.append(song)
+
+        tqdm.write(f"{band} - {song}")
 
     df["filename"] = filenames
     df["embedding"] = embeddings
     df["band"] = bands
-    df["album"] = albums
+    # df["album"] = albums
     df["song"] = songs
 
     df.to_pickle("songs_embeddings.pkl")
@@ -68,6 +76,6 @@ def pipeline(data_path: Path):
 
 
 if __name__ == "__main__":
-    data_path = Path("./data/metallica/")
+    data_path = Path("./data/guess-the-song/")
     df = pipeline(data_path=data_path)
     print(df.head())
