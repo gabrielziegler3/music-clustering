@@ -13,7 +13,7 @@ audio_signal = AudioSignal()
 ACCEPTED_EXTENSIONS = (".mp3", ".wav", ".flac", ".ogg")
 
 
-def file_generator(dir_path: str) -> Generator[str, None, None]:
+def file_generator(dir_path: Path) -> Generator[str, None, None]:
     for (dirpath, dirnames, filenames) in os.walk(dir_path):
         for filename in filenames:
             if os.path.splitext(filename)[-1] in ACCEPTED_EXTENSIONS:
@@ -70,12 +70,12 @@ def pipeline(data_path: Path):
     # df["album"] = albums
     df["song"] = songs
 
-    df.to_pickle("songs_embeddings.pkl")
+    df.to_pickle("rap_songs_embeddings.pkl")
 
     return df
 
 
 if __name__ == "__main__":
-    data_path = Path("./data/guess-the-song/")
+    data_path = Path("./data/rap/")
     df = pipeline(data_path=data_path)
     print(df.head())

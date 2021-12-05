@@ -15,10 +15,9 @@ class AudioSignal:
         self.n_channels: int
         self.dtype: Any
         self.sample_rate: int
-        self.filename: str
-        self.embedding: torch.Tensor
+        self.filename: Path
 
-    def __call__(self, file: Path, transform: bool, trim: Tuple[int, int], get_embedding: bool = False):
+    def __call__(self, file: Path, transform: bool, trim: Tuple[int, int]):
         self.filename = file
         self.signal, self.sample_rate = torchaudio.load(file)
         self.dtype = self.signal.dtype
@@ -28,9 +27,6 @@ class AudioSignal:
             self.to_mono()
             self.trim_audio(*trim)
 
-        if get_embedding:
-            self.embedding = self.extract_embedding()
-
         return self
 
     def __repr__(self):
@@ -38,9 +34,6 @@ class AudioSignal:
 
     def trim_audio(self, initial: int, final: int):
         self.signal = self.signal[initial:final * self.sample_rate]
-
-    def extract_embedding(self):
-        self.embedding = torch.Tensor((0, 0))
 
     def resample(self, resample_rate: int = 16000):
         resampler = T.Resample(
@@ -59,17 +52,3 @@ def file_generator(dir_path: Path):
             continue
         yield os.path.join(dir_path, file)
 
-
-def pipeline(filename):
-    audiosignal = AudioSignal()
-    signal = audiosignal(filename, transform=True,
-                         trim=(50, 60), get_embedding=True)
-    return signal
-
-
-if __name__ == "__main__":
-    dir_path = "data/"
-
-    audio_signals = [pipeline(file) for file in tqdm(file_generator(dir_path))]
-
-    [print(i, "\n==============================\n") for i in audio_signals]
