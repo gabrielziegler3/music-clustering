@@ -1,5 +1,7 @@
+import sys
 import os
 import pandas as pd
+import pathlib
 
 from typing import Generator
 from pathlib import Path
@@ -14,6 +16,9 @@ ACCEPTED_EXTENSIONS = (".mp3", ".wav", ".flac", ".ogg")
 
 
 def file_generator(dir_path: Path) -> Generator[str, None, None]:
+    if not Path.is_dir(dir_path):
+        raise ValueError("Directory does not exist")
+
     for (dirpath, dirnames, filenames) in os.walk(dir_path):
         for filename in filenames:
             if os.path.splitext(filename)[-1] in ACCEPTED_EXTENSIONS:
@@ -21,7 +26,7 @@ def file_generator(dir_path: Path) -> Generator[str, None, None]:
 
 
 def get_band(filepath):
-    return str(filepath).split("/")[2]
+    return str(filepath).split("/")[3]
 
 
 def get_embedding(filepath):
@@ -39,7 +44,7 @@ def get_song(filepath):
     return str(filepath).split("/")[-1]
 
 
-def pipeline(data_path: Path):
+def pipeline(data_path: Path, save_as: Path) -> pd.DataFrame:
     df = pd.DataFrame()
 
     generator_count = sum(1 for _ in file_generator(data_path))
@@ -70,12 +75,29 @@ def pipeline(data_path: Path):
     # df["album"] = albums
     df["song"] = songs
 
-    df.to_pickle("rap_songs_embeddings.pkl")
+
+    if save_as.is_file():
+        full_df = pd.read_pickle(save_as)
+        df = pd.concat([full_df, df])
+        df = df.reset_index()
+        if full_df.shape[0] > df.shape[0]:
+            print(f"Refusing to write to {save_as} due to data loss.")
+            sys.exit()
+        df.to_pickle(save_as)
+        print("Embeddings updated to file: ", save_as)
+    else:
+        df.to_pickle(save_as)
+        print("Embeddings written to file: ", save_as)
 
     return df
 
 
 if __name__ == "__main__":
-    data_path = Path("./data/rap/")
-    df = pipeline(data_path=data_path)
+    df_path = Path("full_dataset.pkl")
+    genre = "rap"
+    data_path = Path("./data/music-dataset/") / genre
+    df = pipeline(data_path=data_path, save_as=df_path)
     print(df.head())
+    print(df.shape)
+    print(df.columns)
+    print(df["band"].value_counts())
