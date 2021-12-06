@@ -79,7 +79,7 @@ def pipeline(data_path: Path, save_as: Path) -> pd.DataFrame:
     if save_as.is_file():
         full_df = pd.read_pickle(save_as)
         df = pd.concat([full_df, df])
-        df = df.reset_index()
+        df = df.reset_index(drop=True)
         if full_df.shape[0] > df.shape[0]:
             print(f"Refusing to write to {save_as} due to data loss.")
             sys.exit()
@@ -94,7 +94,7 @@ def pipeline(data_path: Path, save_as: Path) -> pd.DataFrame:
 
 if __name__ == "__main__":
     df_path = Path("full_dataset.pkl")
-    genre = "rap"
+    genre = "pop"
     data_path = Path("./data/music-dataset/") / genre
     df = pipeline(data_path=data_path, save_as=df_path)
     print(df.head())
