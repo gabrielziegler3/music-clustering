@@ -8,7 +8,7 @@ Given a dataset with songs from some artists, I have extracted 15s excerpts from
 
 Once we have the embeddings, we can visualize them on a TSNE plot:
 
-![]("./images/tsne_bands.svg")
+<img src="./images/tsne_bands.svg">
 
 The artists where the vocal components are the most predominant, like `pop` and `rap`, are the ones that the model is capable to separate the best.
 Interestingly, the `techno` genre represented by Boris Brejcha is also nicely separated and is closer to the `metal` and `rock` bands than to `rap` and `pop`
